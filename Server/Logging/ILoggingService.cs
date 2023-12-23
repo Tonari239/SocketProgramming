@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace Server.Logging
 {
-    interface ILoggingService
+    public interface ILoggingService
     {
+
+        public void LogError(Exception ex);
+        public void LogTask(ServerTask serverTask);
     }
 }
