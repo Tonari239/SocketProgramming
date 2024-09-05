@@ -1,19 +1,23 @@
-﻿using System;
+﻿using Common.Logging;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Action = Common.Logging.Action;
 
 namespace Client
 {
     class ServerClient
     {
+        private readonly ILoggingService _loggingService;
         private readonly Socket _serverConnection;
         private readonly IPEndPoint _remoteEndPoint;
         private byte[] buffer = new byte[1024];
 
         private static int clientId = 0;
-        public ServerClient(string serverName, int port)
+        public ServerClient(string serverName, int port, ILoggingService loggingService)
         {
+            _loggingService = loggingService;
             IPAddress _serverIpAddress = Dns.GetHostEntry(serverName).AddressList[0];
             _remoteEndPoint = new IPEndPoint(_serverIpAddress, port);
             _serverConnection = new Socket(_serverIpAddress.AddressFamily,
@@ -25,7 +29,8 @@ namespace Client
         {
             _serverConnection.Connect(_remoteEndPoint);
 
-            Console.WriteLine($"Socket with id {clientId} connected to server.");
+            _loggingService.LogTask(new NetworkingTask(DateTime.Now, Action.CLIENT_CONNECTED),
+                $"Socket with id {clientId} connected to server.");
         }
 
         public void SendData(dynamic data)
@@ -37,20 +42,10 @@ namespace Client
                 _serverConnection.Send(msg);
 
                 int bytesRec = _serverConnection.Receive(buffer);
-                Console.WriteLine("Echoed test = {0}",
-                    Encoding.ASCII.GetString(buffer, 0, bytesRec));
-            }
-            catch (ArgumentNullException ane)
-            {
-                Console.WriteLine("ArgumentNullException : {0}", ane.ToString());
-            }
-            catch (SocketException se)
-            {
-                Console.WriteLine("SocketException : {0}", se.ToString());
             }
             catch (Exception e)
             {
-                Console.WriteLine("Unexpected exception : {0}", e.ToString());
+                _loggingService.LogError(e);
             }
         }
 
@@ -58,6 +53,7 @@ namespace Client
         {
             _serverConnection.Shutdown(SocketShutdown.Both);
             _serverConnection.Close();
+            _loggingService.LogTask(new NetworkingTask(DateTime.Now, Action.CLIENT_DISCONNECTED));
         }
     }
 }

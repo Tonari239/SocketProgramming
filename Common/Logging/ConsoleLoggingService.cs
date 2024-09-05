@@ -1,11 +1,4 @@
-﻿using Server.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Server
+﻿namespace Common.Logging
 {
     public class ConsoleLoggingService : ILoggingService
     {
@@ -14,9 +7,11 @@ namespace Server
             Console.WriteLine(ex.Message);
         }
 
-        public void LogTask(ServerTask serverTask)
+        public void LogTask(NetworkingTask serverTask, string? message)
         {
             Console.WriteLine(serverTask.ToString());
+            if (message != null)
+                Console.WriteLine(message);
         }
     }
 }

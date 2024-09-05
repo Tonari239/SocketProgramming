@@ -4,23 +4,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Server.Logging
+namespace Common.Logging
 {
-    public enum ServerAction
+     public enum Action
     {
-           SERVER_STARTED,
-           CLIENT_CONNECTED,
-           CLIENT_DISCONNECTED,
-           RECEIVED_DATA,
-           SEND_DATA
+        SERVER_STARTED,
+        CLIENT_CONNECTED,
+        CLIENT_DISCONNECTED,
+        RECEIVED_DATA,
+        SEND_DATA
     }
 
-    public class ServerTask
+    public class NetworkingTask
     {
         public DateTime ExecutionTimeStamp { get; }
-        public ServerAction ServerAction { get; set; }
+        public Action ServerAction { get; set; }
 
-        public ServerTask(DateTime executionTimeStamp, ServerAction serverAction)
+        public NetworkingTask(DateTime executionTimeStamp, Action serverAction)
         {
             ExecutionTimeStamp = executionTimeStamp;
             ServerAction = serverAction;

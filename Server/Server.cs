@@ -1,6 +1,5 @@
-﻿using Server.Logging;
+﻿using Common.Logging;
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -34,7 +33,7 @@ namespace Server
                 listener.Bind(localEndPoint);
                 listener.Listen(MAX_CLIENTS_IN_QUEUE);
 
-                _loggingService.LogTask(new ServerTask(DateTime.Now, ServerAction.SERVER_STARTED));
+                _loggingService.LogTask(new NetworkingTask(DateTime.Now, Common.Logging.Action.SERVER_STARTED));
                 Socket handler = listener.Accept();
 
                 string data = ReceiveData(handler);;
@@ -68,14 +67,14 @@ namespace Server
                 }
             }
 
-            _loggingService.LogTask(new ServerTask(DateTime.Now, ServerAction.RECEIVED_DATA));
+            _loggingService.LogTask(new NetworkingTask(DateTime.Now, Common.Logging.Action.RECEIVED_DATA));
             return data;
         }
 
         private void SendData(Socket client, string data)
         {
             client.Send(Encoding.ASCII.GetBytes(data));
-            _loggingService.LogTask(new ServerTask(DateTime.Now, ServerAction.SEND_DATA));
+            _loggingService.LogTask(new NetworkingTask(DateTime.Now, Common.Logging.Action.SEND_DATA));
         }
     }
 }

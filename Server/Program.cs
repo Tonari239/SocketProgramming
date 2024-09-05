@@ -1,4 +1,4 @@
-﻿using Server.Logging;
+﻿using Common.Logging;
 using System;
 using System.Configuration;
 
