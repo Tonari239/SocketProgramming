@@ -1,4 +1,5 @@
-﻿using Common.Logging;
+﻿using Common.DataTransfer;
+using Common.Logging;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -12,8 +13,6 @@ namespace Server
         private readonly IPAddress ipAddress;
         private readonly int MAX_CLIENTS_IN_QUEUE = 10;
         private readonly IPEndPoint localEndPoint;
-        private const string EOF_INDICATOR = "<EOF>";
-        private const string ACKNOWLEDGE_INDICATOR = "ACK";
         private const int BUFFER_SIZE = 1024;
 
         public Server(string hostName, int port, ILoggingService loggingService)
@@ -25,7 +24,7 @@ namespace Server
             localEndPoint = new IPEndPoint(ipAddress, port);
         }
 
-        public void StartServer()
+        public void StartServer<T>() where T : struct
         {
             try
             {
@@ -38,9 +37,11 @@ namespace Server
                 while (true) 
                 {
                     Socket handler = listener.Accept();
-                    string data = ReceiveData(handler);
+                    //the presumption is that the client sends the number of items in the array
+                    T[] data = ReceiveData<T>(handler);
 
-                    SendData(handler, ACKNOWLEDGE_INDICATOR);
+                    Array.Sort(data);
+                    SendData(handler, data);
                    
                     handler.Shutdown(SocketShutdown.Both);
                     handler.Close();
@@ -56,29 +57,25 @@ namespace Server
             Console.ReadKey();
         }
 
-        private string ReceiveData(Socket client)
+        private T[] ReceiveData<T>(Socket client) where T : struct
         {
-            string data = null;
-            byte[] bytes = null;
+            byte[] bytes = new byte[BUFFER_SIZE];
+            client.Receive(bytes);
 
-            while (true)
-            {
-                bytes = new byte[BUFFER_SIZE];
-                int bytesRec = client.Receive(bytes);
-                data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                if (data.IndexOf(EOF_INDICATOR) > -1)
-                {
-                    break;
-                }
-            }
+            //the presumption is that the client sends the number of elements first
+            int elementsCount = ByteSerializer<int>.Deserialize(bytes);
 
-            _loggingService.LogTask(new NetworkingTask(DateTime.Now, Common.Logging.Action.RECEIVED_DATA), $"Received data {data} from client");
-            return data;
+            //and then the elements of the array
+            client.Receive(bytes);
+            T[] result = ArrayByteSerializer<T>.Deserialize(bytes);
+
+            _loggingService.LogTask(new NetworkingTask(DateTime.Now, Common.Logging.Action.RECEIVED_DATA), $"Received data `{string.Join(',', result)}` from client");
+            return result;
         }
 
-        private void SendData(Socket client, string data)
+        private void SendData<T>(Socket client, T[] data) where T : struct
         {
-            client.Send(Encoding.ASCII.GetBytes(data));
+            client.Send(ArrayByteSerializer<T>.Serialize(data));
             _loggingService.LogTask(new NetworkingTask(DateTime.Now, Common.Logging.Action.SENT_DATA), $"Sent data {data} to client");
         }
     }

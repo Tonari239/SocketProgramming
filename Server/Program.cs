@@ -13,7 +13,7 @@ namespace Server
         {
             Initialize();
 
-            server.StartServer();
+            server.StartServer<int>();
             return 0;
         }
 

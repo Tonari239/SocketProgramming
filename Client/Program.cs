@@ -44,7 +44,7 @@ namespace Client
         {
             foreach (ServerClient client in clients)
             {
-                client.SendData("Holy macaroni<EOF>");
+                client.SendData([1,4,6,23,6,8,3,67,3]);
             }
         }
 
