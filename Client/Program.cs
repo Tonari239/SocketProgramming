@@ -1,6 +1,5 @@
 ﻿using Common.Logging;
 using System;
-using System.Collections.Generic;
 using System.Configuration;
 
 namespace Client
@@ -13,8 +12,6 @@ namespace Client
         public static string logFilePattern = ConfigurationManager.AppSettings.Get("logFile");
         public static int Main(String[] args)
         {
-            
-
             InitializeClients();
             
             SendDataFromClients();
@@ -34,10 +31,10 @@ namespace Client
 
             clients = new ServerClient[clientsCount];
 
-            for (int i = 0; i <= clientsCount; i++)
+            for (int i = 0; i < clientsCount; i++)
             {
-                logFileName = string.Format(logFilePattern, i);
-                loggingService = new FileLoggingService(logFileName);
+               // logFileName = string.Format(logFilePattern, i);
+                loggingService = new ConsoleLoggingService();
                 clients[i] = new ServerClient(hostName, port, loggingService);
                 clients[i].ConnectToServer();
             }

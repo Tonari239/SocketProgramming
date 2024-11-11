@@ -12,7 +12,7 @@ namespace Common.Logging
         CLIENT_CONNECTED,
         CLIENT_DISCONNECTED,
         RECEIVED_DATA,
-        SEND_DATA
+        SENT_DATA
     }
 
     public class NetworkingTask

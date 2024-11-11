@@ -34,13 +34,18 @@ namespace Server
                 listener.Listen(MAX_CLIENTS_IN_QUEUE);
 
                 _loggingService.LogTask(new NetworkingTask(DateTime.Now, Common.Logging.Action.SERVER_STARTED));
-                Socket handler = listener.Accept();
 
-                string data = ReceiveData(handler);;
+                while (true) 
+                {
+                    Socket handler = listener.Accept();
+                    string data = ReceiveData(handler);
 
-                SendData(handler, ACKNOWLEDGE_INDICATOR);
-                handler.Shutdown(SocketShutdown.Both);
-                handler.Close();
+                    SendData(handler, ACKNOWLEDGE_INDICATOR);
+                   
+                    handler.Shutdown(SocketShutdown.Both);
+                    handler.Close();
+                }
+                
             }
             catch (Exception e)
             {
@@ -67,14 +72,14 @@ namespace Server
                 }
             }
 
-            _loggingService.LogTask(new NetworkingTask(DateTime.Now, Common.Logging.Action.RECEIVED_DATA));
+            _loggingService.LogTask(new NetworkingTask(DateTime.Now, Common.Logging.Action.RECEIVED_DATA), $"Received data {data} from client");
             return data;
         }
 
         private void SendData(Socket client, string data)
         {
             client.Send(Encoding.ASCII.GetBytes(data));
-            _loggingService.LogTask(new NetworkingTask(DateTime.Now, Common.Logging.Action.SEND_DATA));
+            _loggingService.LogTask(new NetworkingTask(DateTime.Now, Common.Logging.Action.SENT_DATA), $"Sent data {data} to client");
         }
     }
 }

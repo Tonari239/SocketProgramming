@@ -38,10 +38,11 @@ namespace Client
             try
             {
                 byte[] msg = Encoding.ASCII.GetBytes(data);
-
                 _serverConnection.Send(msg);
+                _loggingService.LogTask(new NetworkingTask(DateTime.Now, Action.SENT_DATA), $"Sent data `{data}` to server, total bytes: {msg.Length}");
 
                 int bytesRec = _serverConnection.Receive(buffer);
+                _loggingService.LogTask(new NetworkingTask(DateTime.Now, Action.RECEIVED_DATA), $"Received data `{data}` from server, total bytes: {bytesRec}");
             }
             catch (Exception e)
             {
